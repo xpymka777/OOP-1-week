@@ -1,8 +1,22 @@
 from django.shortcuts import render
 from django.db.models import Q
+from django.views import generic
+from django.contrib.auth.mixins import LoginRequiredMixin
 # Create your views here.
 
 from .models import Book, Author, BookInstance, Genre
+
+
+class LoanedBooksByUserListView(LoginRequiredMixin, generic.ListView):
+    """
+    Generic class-based view listing books on loan to current user.
+    """
+    model = BookInstance
+    template_name = 'catalog/bookinstance_list_borrowed_user.html'
+    paginate_by = 10
+
+    def get_queryset(self):
+        return BookInstance.objects.filter(borrower=self.request.user).filter(status__exact='o').order_by('due_back')
 
 
 # изначальная функция отображения
@@ -43,6 +57,8 @@ def index(request):
     # Получение количества книг, содержащих определенное слово в заголовке
     search_word = "ваше_слово_для_поиска"
     num_books_with_word = Book.objects.filter(title__icontains=search_word).count()
+    num_visits = request.session.get('num_visits', 0)
+    request.session['num_visits'] = num_visits + 1
 
     # Отрисовка HTML-шаблона index.html с данными внутри
     # переменной контекста context
@@ -56,5 +72,23 @@ def index(request):
             'num_authors': num_authors,
             'num_genres': num_genres,
             'num_books_with_word': num_books_with_word,
+            'num_visits': num_visits,
         },
     )
+
+
+class BookListView(generic.ListView):
+    model = Book
+    paginate_by = 10
+
+
+class BookDetailView(generic.DetailView):
+    model = Book
+
+
+class AuthorListView(generic.ListView):
+    model = Author
+
+
+class AuthorDetailView(generic.DetailView):
+    model = Author

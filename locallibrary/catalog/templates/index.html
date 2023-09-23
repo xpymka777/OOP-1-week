@@ -20,6 +20,11 @@
   <li><strong>Genres:</strong> {{ num_genres }}</li> <!-- Добавлено новое значение -->
   <li><strong>Books with word:</strong> {{ num_books_with_word }}</li> <!-- Добавлено новое значение -->
 </ul>
-
+<p>
+  You have visited this page {{ num_visits }}{% if num_visits == 1 %} time{%
+  else %} times{% endif %}.
+</p>
 {% endblock %}
+
+
 
